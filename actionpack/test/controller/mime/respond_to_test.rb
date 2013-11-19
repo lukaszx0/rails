@@ -93,7 +93,6 @@ class RespondToController < ActionController::Base
     end
   end
 
-
   def custom_constant_handling
     respond_to do |type|
       type.html   { render :text => "HTML"   }
@@ -143,6 +142,27 @@ class RespondToController < ActionController::Base
     respond_to do |type|
       type.html   { @type = "Firefox"; render :action => "iphone_with_html_response_type" }
       type.iphone { @type = "iPhone" ; render :action => "iphone_with_html_response_type" }
+    end
+  end
+
+  def variant_set_in_request
+    request.variant = :mobile
+  end
+
+  def variant_set_in_request_with_respond_to
+    request.variant = :mobile
+
+    respond_to do |type|
+      type.html { render text: "mobile" }
+    end
+  end
+
+  def variant_set_in_respond_to_inside_format
+    respond_to do |type|
+      type.html do |html|
+        html.tablet { render text: "tablet" }
+        html.phone  { render text: "phone" }
+      end
     end
   end
 
@@ -489,5 +509,25 @@ class RespondToControllerTest < ActionController::TestCase
     assert_raises(ActionController::UnknownFormat) do
       get :using_defaults, :format => "invalidformat"
     end
+  end
+
+  def test_variant_set_in_request
+    get :variant_set_in_request
+    assert_equal "text/html", @response.content_type
+    assert_equal "mobile", @response.body
+  end
+
+  def test_variant_set_in_request_with_respond_to
+    @request.variant = :phone
+    get :variant_set_in_request_with_respond_to
+    assert_equal "text/html", @response.content_type
+    assert_equal "mobile", @response.body
+  end
+
+  def test_variant_set_in_respond_to_inside_format
+    @request.variant = :tablet
+    get :variant_set_in_respond_to_inside_format
+    assert_equal "text/html", @response.content_type
+    assert_equal "tablet", @response.body
   end
 end

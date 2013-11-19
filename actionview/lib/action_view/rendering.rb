@@ -81,6 +81,7 @@ module ActionView
     # :api: private
     def _render_template(options) #:nodoc:
       lookup_context.rendered_format = nil if options[:formats]
+      lookup_context.variants = [request.variant] unless options[:formats]
       view_renderer.render(view_context, options)
     end
 
@@ -99,7 +100,8 @@ module ActionView
       def _process_format(format) #:nodoc:
         super
         lookup_context.formats = [format.to_sym]
-        lookup_context.rendered_format = lookup_context.formats.first
+        lookup_context.variants = [request.variant]
+        lookup_context.rendered_format = format.to_sym
       end
 
       # Normalize args by converting render "foo" to render :action => "foo" and

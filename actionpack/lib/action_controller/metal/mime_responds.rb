@@ -187,7 +187,7 @@ module ActionController #:nodoc:
       raise ArgumentError, "respond_to takes either types or a block, never both" if mimes.any? && block_given?
 
       if collector = retrieve_collector_from_mimes(mimes, &block)
-        response = collector.response
+        response = collector.response(request)
         response ? response.call : render({})
       end
     end
@@ -327,7 +327,7 @@ module ActionController #:nodoc:
       if collector = retrieve_collector_from_mimes(&block)
         options = resources.size == 1 ? {} : resources.extract_options!
         options = options.clone
-        options[:default_response] = collector.response
+        options[:default_response] = collector.response(request)
         (options.delete(:responder) || self.class.responder).call(self, resources, options)
       end
     end
@@ -417,12 +417,29 @@ module ActionController #:nodoc:
         @responses[mime_type] ||= block
       end
 
-      def response
-        @responses.fetch(format, @responses[Mime::ALL])
+      def response(request)
+        response = @responses.fetch(format, @responses[Mime::ALL])
+        if response.arity == 0 || response.nil?
+          response
+        else
+          lambda { response.call VariantFilter.new(request.variant) }
+        end
       end
 
       def negotiate_format(request)
         @format = request.negotiate_mime(@responses.keys)
+      end
+
+      class VariantFilter
+        attr_accessor :variant
+
+        def initialize(variant)
+          @variant = variant
+        end
+
+        def method_missing(name)
+          yield if name == variant
+        end
       end
     end
   end
