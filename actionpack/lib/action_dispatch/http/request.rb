@@ -51,6 +51,7 @@ module ActionDispatch
       @fullpath          = nil
       @ip                = nil
       @uuid              = nil
+      @variant           = nil
     end
 
     def key?(key)
@@ -267,6 +268,14 @@ module ActionDispatch
 
     def session_options=(options)
       Session::Options.set @env, options
+    end
+
+    def variant=(variant)
+      @variant = variant.to_sym
+    end
+
+    def variant
+      @variant
     end
 
     # Override Rack's GET method to support indifferent access

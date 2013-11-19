@@ -396,6 +396,7 @@ module ActionController #:nodoc:
     # request, with this response then being accessible by calling #response.
     class Collector
       include AbstractController::Collector
+
       attr_accessor :format
 
       def initialize(mimes)
@@ -414,7 +415,20 @@ module ActionController #:nodoc:
 
       def custom(mime_type, &block)
         mime_type = Mime::Type.lookup(mime_type.to_s) unless mime_type.is_a?(Mime::Type)
-        @responses[mime_type] ||= block
+
+        variant_collector = VariantCollector.new
+        yield variant_collector if block_given?
+
+        if variant_collector.any?
+          variant_collector.variants.each do |variant, variant_block|
+            mime_type = mime_type.dup
+            mime_type.variant = variant
+
+            @responses[mime_type] ||= variant_block
+          end
+        else
+          @responses[mime_type] ||= block
+        end
       end
 
       def response
@@ -422,7 +436,23 @@ module ActionController #:nodoc:
       end
 
       def negotiate_format(request)
-        @format = request.negotiate_mime(@responses.keys)
+        @format = request.negotiate_mime(@responses.keys, request.variant)
+      end
+
+      class VariantCollector
+        attr_accessor :variants
+
+        def initialize
+          self.variants = {}
+        end
+
+        def method_missing(name, &block)
+          self.variants[name] = block if block_given?
+        end
+
+        def any?
+          self.variants.present?
+        end
       end
     end
   end

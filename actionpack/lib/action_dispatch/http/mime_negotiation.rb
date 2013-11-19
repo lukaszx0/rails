@@ -104,11 +104,11 @@ module ActionDispatch
       # Receives an array of mimes and return the first user sent mime that
       # matches the order array.
       #
-      def negotiate_mime(order)
+      def negotiate_mime(order, variant = nil)
         formats.each do |priority|
           if priority == Mime::ALL
             return order.first
-          elsif order.include?(priority)
+          elsif order.find{ |mime| mime == priority && mime.variant == variant }
             return priority
           end
         end
