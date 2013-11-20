@@ -100,7 +100,6 @@ module ActionView
       def _process_format(format) #:nodoc:
         super
         lookup_context.formats = [format.to_sym]
-        lookup_context.variants = [request.variant]
         lookup_context.rendered_format = format.to_sym
       end
 

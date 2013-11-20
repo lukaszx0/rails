@@ -419,7 +419,7 @@ module ActionController #:nodoc:
 
       def response(request)
         response = @responses.fetch(format, @responses[Mime::ALL])
-        if response.arity == 0 || response.nil?
+        if response.nil? || response.arity == 0
           response
         else
           lambda { response.call VariantFilter.new(request.variant) }

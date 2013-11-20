@@ -6,7 +6,7 @@ gemspec
 # loaded after loading the test library to
 # ensure correct loading order
 gem 'mocha', '~> 0.14', require: false
-
+gem'pry'
 gem 'rack-cache', '~> 1.2'
 gem 'bcrypt-ruby', '~> 3.1.2'
 gem 'jquery-rails', '~> 2.2.0'

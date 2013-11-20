@@ -56,4 +56,7 @@ module ActionController
 
   class UnknownFormat < ActionControllerError #:nodoc:
   end
+
+  class VariantTypeMismatch < ActionControllerError #:nondoc:
+  end
 end

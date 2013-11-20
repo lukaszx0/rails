@@ -271,6 +271,7 @@ module ActionDispatch
     end
 
     def variant=(variant)
+      raise ActionController::VariantTypeMismatch, "request.variant value should be symbol (got: #{variant.class})" unless variant.is_a?(Symbol)
       @variant = variant.to_sym
     end
 

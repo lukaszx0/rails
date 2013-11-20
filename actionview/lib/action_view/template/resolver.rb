@@ -155,7 +155,6 @@ module ActionView
       templates.each do |t|
         t.locals         = locals
         t.formats        = details[:formats] || [:html] if t.formats.empty?
-        t.variants       = details[:variants] || []
         t.virtual_path ||= (cached ||= build_path(*path_info))
       end
     end
@@ -241,7 +240,7 @@ module ActionView
       end
 
       handler = Template.handler_for_extension(extension)
-      format  = pieces.last && pieces.last.split("+", 2).first # remove variant from format
+      format  = pieces.last && pieces.last.split(EXTENSIONS[:variant], 2).first # remove variant from format
       format  = format && Template::Types[format]
 
       [handler, format]
@@ -308,9 +307,9 @@ module ActionView
     def build_query(path, details)
       query = escape_entry(File.join(@path, path))
 
-      exts = Hash[EXTENSIONS.map{ |ext, prefix| [details[ext], prefix] }].map { |ext, prefix|
-        "{#{ext.compact.uniq.map { |e| "#{prefix}#{e}," }.join}}"
-      }.join
+      exts = EXTENSIONS.map do |ext, prefix|
+        "{#{details[ext].compact.uniq.map { |e| "#{prefix}#{e}," }.join}}"
+      end.join
 
       query + exts
     end
