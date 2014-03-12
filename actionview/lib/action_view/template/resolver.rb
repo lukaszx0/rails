@@ -311,7 +311,7 @@ module ActionView
         "{#{details[ext].compact.uniq.map { |e| "#{prefix}#{e}," }.join}}"
       end.join
 
-      query + exts
+      query.concat(exts)
     end
   end
 
