@@ -122,8 +122,12 @@ module ActionView
 
       def template
         @template ||= begin
-          finder.variants = [ variant ]
-          finder.find(logical_name, [], partial?)
+          finder.formats  = [format]
+          finder.variants = [variant]
+
+          finder.disable_cache do
+            finder.find(logical_name, [], partial?)
+          end
         end
       end
 
@@ -133,7 +137,7 @@ module ActionView
 
       def dependency_digest
         template_digests = dependencies.collect do |template_name|
-          Digestor.digest(name: template_name, format: format, finder: finder, partial: true)
+          Digestor.digest(name: template_name, finder: format, finder: finder, partial: true)
         end
 
         (template_digests + injected_dependencies).join("-")
